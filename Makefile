@@ -26,6 +26,9 @@ else
         DOCKER_PLATFORM ?= local
     endif
 endif
+# The plugins container follows the host platform by default, like the main
+# image. Override to cross-build, e.g. DOCKER_PLUGINS_PLATFORM=linux/amd64.
+DOCKER_PLUGINS_PLATFORM ?= $(DOCKER_PLATFORM)
 DOCKER_PUSH ?= false
 EMBED_BINARY_NAME := headlamp_app
 # Get version and app name from app/package.json
@@ -56,9 +59,9 @@ all: backend frontend
 
 tools/golangci-lint: backend/go.mod backend/go.sum
 ifeq ($(UNIXSHELL), true)
-	GOBIN=`pwd`/backend/tools go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.3
+	GOBIN=`pwd`/backend/tools go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
 else
-	powershell -Command "$$env:GOBIN='$(CURDIR)/backend/tools'; go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.3"
+	powershell -Command "$$env:GOBIN='$(CURDIR)/backend/tools'; go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2"
 endif
 
 backend-lint: tools/golangci-lint
@@ -84,9 +87,18 @@ app-build: frontend/build
 app: app-build
 	cd app && npm run package -- --win --linux --mac
 app-win: app-build
-	cd app && npm run package -- --win
-app-win-msi: app-build
-	cd app && npm run package-msi
+	cd app && npm run package -- --win --x64 --arm64
+app-win-x64: app-build
+	cd app && npm run package -- --win --x64
+app-win-arm64: app-build
+	cd app && npm run package -- --win --arm64
+app-win-msi: app-win-msi-x64
+app-win-msi-x64: app-build
+	cd app && npm run package -- --win --x64
+	cd app && MSI_ARCH="x64" node windows/msi/build.js
+app-win-msi-arm64: app-build
+	cd app && npm run package -- --win --arm64
+	cd app && MSI_ARCH="arm64" node windows/msi/build.js
 app-linux: app-build
 	cd app && npm run package -- --linux
 app-mac: app-build
@@ -390,7 +402,7 @@ image-verify-digests:
 build-plugins-container:
 	$(DOCKER_CMD) $(DOCKER_BUILDX_CMD) build \
 	--pull \
-	--platform=linux/amd64 \
+	--platform=$(DOCKER_PLUGINS_PLATFORM) \
 	--push=$(DOCKER_PUSH) \
 	-t $(DOCKER_REPO)/$(DOCKER_PLUGINS_IMAGE_NAME):$(DOCKER_IMAGE_VERSION) -f \
 	Dockerfile.plugins \

@@ -43,6 +43,16 @@ interface CommandData {
   permissionSecrets: Record<string, number>;
 }
 
+/** Returns only values changed by shell initialization. */
+export function environmentOverrides(
+  environment: NodeJS.ProcessEnv,
+  currentEnvironment: NodeJS.ProcessEnv = process.env
+): NodeJS.ProcessEnv {
+  return Object.fromEntries(
+    Object.entries(environment).filter(([key, value]) => currentEnvironment[key] !== value)
+  );
+}
+
 /**
  * Ask the user with an electron dialog if they want to allow the command
  * to be executed.
@@ -117,6 +127,7 @@ const COMMANDS_WITH_CONSENT = {
     'scriptjs headlamp_minikube/manage-minikube.js',
     'scriptjs minikube/manage-minikube.js',
   ],
+  headlamp_ai_assistant: ['gh auth', 'az account', 'az cognitiveservices'],
 };
 
 /**
@@ -141,6 +152,15 @@ export function addRunCmdConsent(pluginInfo: { name: string }): void {
   if (pluginIsMinikube) {
     commands = COMMANDS_WITH_CONSENT.headlamp_minikube;
   }
+
+  const pluginIsAiAssistant =
+    pluginInfo.name === 'headlamp_ai-assistant' ||
+    pluginInfo.name === 'headlamp_ai-assistantprerelease' ||
+    (process.env.NODE_ENV === 'development' && pluginInfo.name === 'ai-assistant');
+  if (pluginIsAiAssistant) {
+    commands = COMMANDS_WITH_CONSENT.headlamp_ai_assistant;
+  }
+
   for (const command of commands) {
     if (!settings.confirmedCommands[command]) {
       settings.confirmedCommands[command] = true;
@@ -166,6 +186,12 @@ export function removeRunCmdConsent(pluginName: string): void {
     pluginName === '@headlamp-k8s/minikube'
   ) {
     commands = COMMANDS_WITH_CONSENT.headlamp_minikube;
+  }
+  if (
+    pluginName === '@headlamp-k8s/ai-assistant' ||
+    pluginName === '@headlamp-k8s/ai-assistantprerelease'
+  ) {
+    commands = COMMANDS_WITH_CONSENT.headlamp_ai_assistant;
   }
   for (const command of commands) {
     delete settings.confirmedCommands[command];
@@ -234,12 +260,12 @@ function getPluginsScriptPath(scriptName: string) {
  * @param permissionSecrets - The permission secrets required for the command to run.
  *                            Checks against eventData.permissionSecrets.
  */
-export function handleRunCommand(
+export async function handleRunCommand(
   event: IpcMainEvent,
   eventData: CommandDataPartial,
   mainWindow: BrowserWindow | null,
   permissionSecrets: Record<string, number>
-): void {
+): Promise<void> {
   if (mainWindow === null) {
     console.error('Main window is null, cannot run command');
     return;
@@ -269,16 +295,32 @@ export function handleRunCommand(
       ? [getPluginsScriptPath(commandData.args[0]), ...commandData.args.slice(1)]
       : commandData.args;
 
+  let shellEnvironment = process.env;
+  try {
+    const { getShellEnvironment } = await import('./main');
+    shellEnvironment = await getShellEnvironment();
+  } catch (error) {
+    console.warn('Failed to get shell environment, using process.env:', error);
+  }
+
   // If the command is 'scriptjs', we pass the HEADLAMP_RUN_SCRIPT=true
   // env var so that the Headlamp or Electron process runs the script.
-  const child: ChildProcessWithoutNullStreams = spawn(command, args, {
-    ...commandData.options,
-    shell: false,
-    env: {
-      ...process.env,
-      ...(commandData.command === 'scriptjs' ? { HEADLAMP_RUN_SCRIPT: 'true' } : {}),
-    },
-  });
+  let child: ChildProcessWithoutNullStreams;
+  try {
+    child = spawn(command, args, {
+      ...commandData.options,
+      shell: false,
+      env: {
+        ...shellEnvironment,
+        ...(commandData.command === 'scriptjs' ? { HEADLAMP_RUN_SCRIPT: 'true' } : {}),
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    event.sender.send('command-stderr', commandData.id, message);
+    event.sender.send('command-exit', commandData.id, -1);
+    return;
+  }
 
   child.stdout.on('data', (data: string | Buffer) => {
     event.sender.send('command-stdout', commandData.id, data.toString());
@@ -286,6 +328,11 @@ export function handleRunCommand(
 
   child.stderr.on('data', (data: string | Buffer) => {
     event.sender.send('command-stderr', commandData.id, data.toString());
+  });
+
+  child.on('error', (err: Error) => {
+    event.sender.send('command-stderr', commandData.id, err.message);
+    event.sender.send('command-exit', commandData.id, -1);
   });
 
   child.on('exit', (code: number | null) => {
@@ -351,6 +398,8 @@ export function setupRunCmdHandlers(mainWindow: BrowserWindow | null, ipcMain: E
     'runCmd-scriptjs-minikube/manage-minikube.js': cryptoRandom(),
     'runCmd-scriptjs-headlamp_minikube/manage-minikube.js': cryptoRandom(),
     'runCmd-scriptjs-headlamp_minikubeprerelease/manage-minikube.js': cryptoRandom(),
+    'runCmd-gh': cryptoRandom(),
+    'runCmd-az': cryptoRandom(),
   };
 
   ipcMain.on('request-plugin-permission-secrets', function giveSecrets() {
@@ -405,7 +454,7 @@ export function validateCommandData(eventData: CommandDataPartial): [boolean, st
     }
   }
 
-  const validCommands = ['minikube', 'az', 'scriptjs'];
+  const validCommands = ['minikube', 'az', 'scriptjs', 'gh'];
 
   if (!validCommands.includes(eventData.command)) {
     return [

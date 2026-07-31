@@ -46,6 +46,19 @@ interface RestartButtonProps {
 }
 
 export function RestartButton(props: RestartButtonProps) {
+  const { item, buttonStyle, afterConfirm } = props;
+
+  if (!item || !isRestartableResource(item)) {
+    return null;
+  }
+
+  return <RestartButtonInner item={item} buttonStyle={buttonStyle} afterConfirm={afterConfirm} />;
+}
+
+
+function RestartButtonInner(
+  props: { item: RestartableResource } & Omit<RestartButtonProps, 'item'>
+) {
   const dispatch: AppDispatch = useDispatch();
   const { item, buttonStyle, afterConfirm } = props;
   const [openDialog, setOpenDialog] = useState(false);
@@ -53,9 +66,6 @@ export function RestartButton(props: RestartButtonProps) {
   const { t } = useTranslation(['translation']);
   const dispatchRestartEvent = useEventCallback(HeadlampEventType.RESTART_RESOURCE);
 
-  if (!item || !isRestartableResource(item)) {
-    return null;
-  }
 
   async function restartResource() {
     const patchData = {
@@ -94,7 +104,11 @@ export function RestartButton(props: RestartButtonProps) {
         item={item}
         authVerb="patch"
         onError={(err: Error) => {
-          console.error(`Error while getting authorization for restart button in ${item}:`, err);
+          console.error(
+            `Error while getting authorization for restart button in ${item.kind} ${item.metadata.namespace}/${item.metadata.name}:`,
+            err
+          );
+
         }}
       >
         <ActionButton
