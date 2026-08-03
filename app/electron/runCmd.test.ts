@@ -34,7 +34,12 @@ vi.mock('./plugin-management', () => ({
 
 vi.mock('./settings', () => ({
   loadSettings: vi.fn(() => ({
-    confirmedCommands: { 'minikube start': true, 'gh auth': true, 'az account': true },
+    confirmedCommands: {
+      [JSON.stringify(['minikube', 'start'])]: true,
+      [JSON.stringify(['gh', 'auth'])]: true,
+      [JSON.stringify(['gh', 'auth', 'token'])]: true,
+      [JSON.stringify(['az', 'account'])]: true,
+    },
   })),
   saveSettings: vi.fn(),
   SETTINGS_PATH: '/fake/settings.json',
