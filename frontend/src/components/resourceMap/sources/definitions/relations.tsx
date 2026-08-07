@@ -26,6 +26,7 @@ import Endpoints from '../../../../lib/k8s/endpoints';
 import EndpointSlice from '../../../../lib/k8s/endpointSlices';
 import Gateway from '../../../../lib/k8s/gateway';
 import GatewayClass from '../../../../lib/k8s/gatewayClass';
+import { useKubeList } from '../../../../lib/k8s/hooks';
 import HPA from '../../../../lib/k8s/hpa';
 import HTTPRoute from '../../../../lib/k8s/httpRoute';
 import Ingress from '../../../../lib/k8s/ingress';
@@ -298,7 +299,7 @@ const replicaSetToOwner = makeOwnerRelation(ReplicaSet);
 
 const useGetCRToOwnerRelations = () => {
   const namespace = useNamespaces();
-  const { items: crds } = CustomResourceDefinition.useList({ namespace });
+  const { items: crds } = useKubeList(CustomResourceDefinition, { namespace });
 
   return useMemo(() => {
     if (!crds) return [];

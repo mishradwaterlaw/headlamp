@@ -76,10 +76,22 @@ export function useSelectedClusters(): string[] {
  *
  * @param apiCalls - functions returning cancellable promises for API calls.
  */
-export function useConnectApi(...apiCalls: (() => CancellablePromise)[]) {
+export function useConnectApi(...args: any[]) {
   // Use the location to make sure the API calls are changed, as they may depend on the cluster
   // (defined in the URL ATM).
   const cluster = useCluster();
+
+  let apiCalls: (() => CancellablePromise)[];
+  let customDeps: React.DependencyList | undefined;
+
+  if (args.length > 0 && Array.isArray(args[args.length - 1])) {
+    customDeps = args.pop() as React.DependencyList;
+    apiCalls = args as (() => CancellablePromise)[];
+  } else {
+    apiCalls = args as (() => CancellablePromise)[];
+  }
+
+  const deps = customDeps ? [...customDeps, cluster] : [cluster];
 
   React.useEffect(
     () => {
@@ -94,6 +106,6 @@ export function useConnectApi(...apiCalls: (() => CancellablePromise)[]) {
     // If we add the apiCalls to the dependency list, then it actually
     // results in undesired reloads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cluster]
+    deps
   );
 }

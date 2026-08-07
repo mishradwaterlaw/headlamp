@@ -20,6 +20,7 @@ import { groupBy, uniq } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useClustersConf } from '../../lib/k8s';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Namespace from '../../lib/k8s/namespace';
 import { useTypedSelector } from '../../redux/hooks';
 import { ProjectDefinition } from '../../redux/projectsSlice';
@@ -55,7 +56,7 @@ const useProjects = (): ProjectDefinition[] => {
   const clusterConf = useClustersConf();
   const clusters = Object.values(clusterConf ?? {});
 
-  const { items: namespaces } = Namespace.useList({
+  const { items: namespaces } = useKubeList(Namespace, {
     clusters: clusters.map(c => c.name),
     labelSelector: PROJECT_ID_LABEL,
   });
@@ -67,7 +68,7 @@ export const useProject = (name: string) => {
   const clusterConf = useClustersConf();
   const clusters = Object.values(clusterConf ?? {});
 
-  const { items: namespaces, isLoading } = Namespace.useList({
+  const { items: namespaces, isLoading } = useKubeList(Namespace, {
     clusters: clusters.map(c => c.name),
     labelSelector: PROJECT_ID_LABEL + '=' + name,
   });

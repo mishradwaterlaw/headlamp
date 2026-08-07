@@ -29,6 +29,7 @@ import * as yaml from 'js-yaml';
 import _ from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useKubeList } from '../../../../lib/k8s/hooks';
 import Namespace from '../../../../lib/k8s/namespace';
 import { useId } from '../../../../lib/util';
 import { ContainerTextField } from './workloadFields';
@@ -472,7 +473,7 @@ export interface NamespaceTextFieldProps {
 /** Autocomplete namespace selector that fetches existing namespaces from the cluster. */
 export function NamespaceTextField(props: NamespaceTextFieldProps) {
   const { value, onChange, required } = props;
-  const [namespaces] = Namespace.useList();
+  const [namespaces] = useKubeList(Namespace);
   const options = React.useMemo(
     () => (namespaces ?? []).map(ns => ns.metadata.name).sort(),
     [namespaces]

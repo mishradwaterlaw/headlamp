@@ -35,6 +35,7 @@ import {
   stopOrDeletePortForward,
 } from '../../../lib/k8s/api/v1/portForward';
 import { KubeContainer } from '../../../lib/k8s/cluster';
+import { useKubeList } from '../../../lib/k8s/hooks';
 import { KubeObject, KubeObjectInterface } from '../../../lib/k8s/KubeObject';
 import Pod from '../../../lib/k8s/pod';
 import Service from '../../../lib/k8s/service';
@@ -170,7 +171,7 @@ function PortForwardContent(props: PortForwardProps) {
 
   const { t } = useTranslation(['translation', 'resource']);
 
-  const [pods, podsFetchError] = Pod.useList({
+  const [pods, podsFetchError] = useKubeList(Pod, {
     namespace,
     labelSelector: getPodsSelectorFilter(service),
   });

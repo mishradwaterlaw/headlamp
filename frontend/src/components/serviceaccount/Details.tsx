@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { ResourceClasses } from '../../lib/k8s';
 import ClusterRoleBinding from '../../lib/k8s/clusterRoleBinding';
+import { useKubeList } from '../../lib/k8s/hooks';
 import RoleBinding from '../../lib/k8s/roleBinding';
 import ServiceAccount from '../../lib/k8s/serviceAccount';
 import Link from '../common/Link';
@@ -92,14 +93,14 @@ function ServiceAccountBindings(props: { serviceAccount: ServiceAccount }) {
     items: roleBindings,
     isLoading: roleBindingsLoading,
     isError: roleBindingsError,
-  } = RoleBinding.useList({
+  } = useKubeList(RoleBinding, {
     cluster: serviceAccount.cluster,
   });
   const {
     items: clusterRoleBindings,
     isLoading: clusterRoleBindingsLoading,
     isError: clusterRoleBindingsError,
-  } = ClusterRoleBinding.useList({ cluster: serviceAccount.cluster });
+  } = useKubeList(ClusterRoleBinding, { cluster: serviceAccount.cluster });
 
   const bindings = React.useMemo(() => {
     const all = [...(roleBindings ?? []), ...(clusterRoleBindings ?? [])];

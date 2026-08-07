@@ -30,6 +30,7 @@ import { drainNode, drainNodeStatus } from '../../lib/k8s/api/v1/drainNode';
 import type { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import type { KubeNodeSummaryStats } from '../../lib/k8s/api/v2/nodeSummaryApi';
 import { KubeContainer, KubeMetrics } from '../../lib/k8s/cluster';
+import { useKubeGet, useKubeList } from '../../lib/k8s/hooks';
 import Node from '../../lib/k8s/node';
 import type { KubePod } from '../../lib/k8s/pod';
 import Pod from '../../lib/k8s/pod';
@@ -85,8 +86,8 @@ export default function NodeDetails(props: { name?: string; cluster?: string }) 
   const [isupdatingNodeScheduleProperty, setisUpdatingNodeScheduleProperty] = React.useState(false);
   const [isNodeDrainInProgress, setisNodeDrainInProgress] = React.useState(false);
   const [pollingDrainNodeName, setPollingDrainNodeName] = React.useState<string | null>(null);
-  const [nodeFromAPI, nodeError] = Node.useGet(name, undefined, { cluster });
-  const { items: nodePods } = Pod.useList({
+  const [nodeFromAPI, nodeError] = useKubeGet(Node, name, undefined, { cluster });
+  const { items: nodePods } = useKubeList(Pod, {
     fieldSelector: name
       ? `spec.nodeName=${name},status.phase!=Succeeded,status.phase!=Failed`
       : undefined,

@@ -16,6 +16,7 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Node from '../../lib/k8s/node';
 import { getResourceMetrics } from '../../lib/util';
 import { HoverInfoLabel } from '../common/Label';
@@ -27,7 +28,7 @@ import { formatTaint, NodeTaintsLabel } from './utils';
 
 export default function NodeList() {
   const [nodeMetrics, metricsError] = Node.useMetrics();
-  const { items } = Node.useList();
+  const { items } = useKubeList(Node);
   const { t } = useTranslation(['glossary', 'translation']);
 
   const noMetrics = metricsError?.status === 404;

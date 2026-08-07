@@ -16,6 +16,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useKubeList } from '../../lib/k8s/hooks';
 import { LimitRange } from '../../lib/k8s/limitRange';
 import Namespace from '../../lib/k8s/namespace';
 import ResourceQuota from '../../lib/k8s/resourceQuota';
@@ -79,7 +80,7 @@ export interface NamespacedLimitRangesSectionProps {
 export function NamespacedLimitRangesSection(props: NamespacedLimitRangesSectionProps) {
   const { resource } = props;
 
-  const { items: limitRanges, errors } = LimitRange.useList({
+  const { items: limitRanges, errors } = useKubeList(LimitRange, {
     namespace: resource.metadata.name,
     cluster: resource.cluster,
   });
@@ -101,7 +102,7 @@ export interface NamespacedResourceQuotasSectionProps {
 export function NamespacedResourceQuotasSection(props: NamespacedResourceQuotasSectionProps) {
   const { resource } = props;
 
-  const { items: resourceQuotas, errors } = ResourceQuota.useList({
+  const { items: resourceQuotas, errors } = useKubeList(ResourceQuota, {
     namespace: resource.metadata.name,
     cluster: resource.cluster,
   });

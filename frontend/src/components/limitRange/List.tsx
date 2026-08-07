@@ -16,6 +16,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
+import { useKubeList } from '../../lib/k8s/hooks';
 import { LimitRange } from '../../lib/k8s/limitRange';
 import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common/CreateResourceButton';
@@ -58,7 +59,7 @@ export function LimitRangeRenderer(props: LimitRangeProps) {
 }
 
 export function LimitRangeList() {
-  const { items: limitRanges, errors } = LimitRange.useList({ namespace: useNamespaces() });
+  const { items: limitRanges, errors } = useKubeList(LimitRange, { namespace: useNamespaces() });
 
   return <LimitRangeRenderer limitRanges={limitRanges} errors={errors} reflectTableInURL />;
 }

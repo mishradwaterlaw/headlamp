@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import { DEFAULT_LIST_LIMIT } from '../../lib/k8s/api/v2/useKubeObjectList';
 import { KubeContainerStatus } from '../../lib/k8s/cluster';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Pod from '../../lib/k8s/pod';
 import { METRIC_REFETCH_INTERVAL_MS, PodMetrics } from '../../lib/k8s/PodMetrics';
 import { parseCpu, parseRam, unparseCpu, unparseRam } from '../../lib/units';
@@ -561,11 +562,11 @@ export function PodListRenderer(props: PodListProps) {
 
 export default function PodList() {
   const namespaces = useNamespaces();
-  const { items, errors, hasMore, remainingItemCount, loadMore } = Pod.useList({
+  const { items, errors, hasMore, remainingItemCount, loadMore } = useKubeList(Pod, {
     namespace: namespaces,
     limit: DEFAULT_LIST_LIMIT,
   });
-  const { items: podMetrics, loadMore: loadMoreMetrics } = PodMetrics.useList({
+  const { items: podMetrics, loadMore: loadMoreMetrics } = useKubeList(PodMetrics, {
     namespace: namespaces,
     limit: DEFAULT_LIST_LIMIT,
     refetchInterval: METRIC_REFETCH_INTERVAL_MS,

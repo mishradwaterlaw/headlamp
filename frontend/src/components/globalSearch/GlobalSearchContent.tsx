@@ -38,6 +38,7 @@ import CronJob from '../../lib/k8s/cronJob';
 import Deployment from '../../lib/k8s/deployment';
 import Endpoints from '../../lib/k8s/endpoints';
 import EndpointSlice from '../../lib/k8s/endpointSlices';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Ingress from '../../lib/k8s/ingress';
 import Job from '../../lib/k8s/job';
 import JobSet from '../../lib/k8s/jobSet';
@@ -116,7 +117,7 @@ const classes: KubeObjectClass[] = [
  */
 function useSearchResources() {
   const inACluster = useSelectedClusters().length > 0;
-  const results = classes.map(cls => cls.useList({ clusters: inACluster ? undefined : [] }));
+  const results = classes.map(cls => useKubeList(cls, { clusters: inACluster ? undefined : [] }));
 
   return useMemo(() => {
     return results.map((result, index) => {

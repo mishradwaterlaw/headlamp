@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import CronJob from '../../lib/k8s/cronJob';
 import DaemonSet from '../../lib/k8s/daemonSet';
 import Deployment from '../../lib/k8s/deployment';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Job from '../../lib/k8s/job';
 import JobSet from '../../lib/k8s/jobSet';
 import Pod from '../../lib/k8s/pod';
@@ -38,14 +39,14 @@ interface WorkloadDict {
 }
 
 export default function Overview() {
-  const [pods] = Pod.useList();
-  const [deployments] = Deployment.useList();
-  const [statefulSets] = StatefulSet.useList();
-  const [daemonSets] = DaemonSet.useList();
-  const [replicaSets] = ReplicaSet.useList();
-  const [jobs] = Job.useList();
-  const [cronJobs] = CronJob.useList();
-  const [jobSets] = JobSet.useList();
+  const [pods] = useKubeList(Pod);
+  const [deployments] = useKubeList(Deployment);
+  const [statefulSets] = useKubeList(StatefulSet);
+  const [daemonSets] = useKubeList(DaemonSet);
+  const [replicaSets] = useKubeList(ReplicaSet);
+  const [jobs] = useKubeList(Job);
+  const [cronJobs] = useKubeList(CronJob);
+  const [jobSets] = useKubeList(JobSet);
 
   const workloadsData: WorkloadDict = useMemo(
     () => ({

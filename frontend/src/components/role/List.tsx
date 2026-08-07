@@ -18,6 +18,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelectedClusters } from '../../lib/k8s';
 import ClusterRole from '../../lib/k8s/clusterRole';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Role from '../../lib/k8s/role';
 import { useNamespaces } from '../../redux/filterSlice';
 import Link from '../common/Link';
@@ -27,10 +28,10 @@ import { ColumnType } from '../common/Resource/ResourceTable';
 export default function RoleList({ namespaces }: { namespaces?: string[] }) {
   const { t } = useTranslation('glossary');
   const selectedNamespaces = useNamespaces();
-  const { items: roles, errors: rolesErrors } = Role.useList({
+  const { items: roles, errors: rolesErrors } = useKubeList(Role, {
     namespace: namespaces ?? selectedNamespaces,
   });
-  const { items: clusterRoles, errors: clusterRolesErrors } = ClusterRole.useList();
+  const { items: clusterRoles, errors: clusterRolesErrors } = useKubeList(ClusterRole);
 
   const clusters = useSelectedClusters();
   const isMultiCluster = clusters.length > 1;

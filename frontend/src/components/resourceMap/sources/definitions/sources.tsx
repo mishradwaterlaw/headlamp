@@ -31,6 +31,7 @@ import EndpointSlice from '../../../../lib/k8s/endpointSlices';
 import Gateway from '../../../../lib/k8s/gateway';
 import GatewayClass from '../../../../lib/k8s/gatewayClass';
 import GRPCRoute from '../../../../lib/k8s/grpcRoute';
+import { useKubeList } from '../../../../lib/k8s/hooks';
 import HPA from '../../../../lib/k8s/hpa';
 import HTTPRoute from '../../../../lib/k8s/httpRoute';
 import Ingress from '../../../../lib/k8s/ingress';
@@ -89,7 +90,7 @@ const makeKubeSource = (cl: KubeObjectClass): GraphSource => ({
   label: cl.apiName,
   icon: <KubeIcon kind={cl.kind as any} />,
   useData() {
-    const [items] = cl.useList({ namespace: useNamespaces() });
+    const [items] = useKubeList(cl, { namespace: useNamespaces() });
 
     return useMemo(() => (items ? { nodes: items?.map(makeKubeObjectNode) } : null), [items]);
   },
@@ -140,7 +141,7 @@ const generateCRSources = (crds: CRD[], vpaEnabled: boolean): GraphSource[] => {
 
 export function useGetAllSources(): GraphSource[] {
   const namespaces = useNamespaces();
-  const { items: CustomResourceDefinition } = CRD.useList({ namespace: namespaces });
+  const { items: CustomResourceDefinition } = useKubeList(CRD, { namespace: namespaces });
   const cluster = useCluster();
   const selectedClusters = useSelectedClusters();
   const [vpaEnabled, setVpaEnabled] = React.useState(false);

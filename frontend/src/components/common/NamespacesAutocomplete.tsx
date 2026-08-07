@@ -29,6 +29,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { loadClusterSettings } from '../../helpers/clusterSettings';
 import { useCluster, useClustersConf } from '../../lib/k8s';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Namespace from '../../lib/k8s/namespace';
 import { setNamespaceFilter } from '../../redux/filterSlice';
 import { useTypedSelector } from '../../redux/hooks';
@@ -266,7 +267,7 @@ const useDefaultNamespaceFallback = (
 function NamespacesFromClusterAutocomplete(
   props: Omit<PureNamespacesAutocompleteProps, 'namespaceNames'>
 ) {
-  const [namespacesList, error] = Namespace.useList();
+  const [namespacesList, error] = useKubeList(Namespace);
   const namespaceNames = useMemo(
     () =>
       uniq(namespacesList?.map(namespace => namespace.metadata.name) ?? [])

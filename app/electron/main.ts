@@ -407,7 +407,7 @@ class PluginManagerEventListeners {
       controller,
     };
 
-    addRunCmdConsent();
+    addRunCmdConsent(pluginInfo);
 
     PluginManager.installFromPluginPkg(
       pluginInfo,

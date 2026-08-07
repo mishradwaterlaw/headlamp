@@ -22,6 +22,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 import Event from '../../lib/k8s/event';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Node from '../../lib/k8s/node';
 import Pod from '../../lib/k8s/pod';
 import { useFilterFunc } from '../../lib/util';
@@ -51,8 +52,8 @@ export default function Overview() {
   const { t } = useTranslation(['translation']);
   // The overview only needs periodic snapshots for aggregate charts. Avoid long-lived
   // watches here because large clusters can stream enough events to exhaust the tab.
-  const [pods] = Pod.useList({ refetchInterval: OVERVIEW_REFETCH_INTERVAL_MS });
-  const [nodes] = Node.useList({ refetchInterval: OVERVIEW_REFETCH_INTERVAL_MS });
+  const [pods] = useKubeList(Pod, { refetchInterval: OVERVIEW_REFETCH_INTERVAL_MS });
+  const [nodes] = useKubeList(Node, { refetchInterval: OVERVIEW_REFETCH_INTERVAL_MS });
   const [nodeMetrics, metricsError] = Node.useMetrics();
   const chartProcessors = useTypedSelector(state => state.overviewCharts.processors);
 
@@ -124,7 +125,7 @@ function EventsSection() {
     )
   );
   const namespace = useNamespaces();
-  const { items: events, errors: eventsErrors } = Event.useList({
+  const { items: events, errors: eventsErrors } = useKubeList(Event, {
     limit: Event.maxLimit,
     namespace,
     refetchInterval: OVERVIEW_REFETCH_INTERVAL_MS,

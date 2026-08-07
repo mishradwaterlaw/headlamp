@@ -42,6 +42,7 @@ import { useTranslation } from 'react-i18next';
 import { loadTableSettings, storeTableSettings } from '../../../helpers/tableSettings';
 import { useSelectedClusters } from '../../../lib/k8s';
 import { ApiError } from '../../../lib/k8s/api/v2/ApiError';
+import { useKubeList } from '../../../lib/k8s/hooks';
 import { KubeObject } from '../../../lib/k8s/KubeObject';
 import { KubeObjectClass } from '../../../lib/k8s/KubeObject';
 import { useFilterFunc } from '../../../lib/util';
@@ -190,7 +191,7 @@ function TableFromResourceClass<KubeClass extends KubeObjectClass>(
 ) {
   const { resourceClass, id, ...otherProps } = props;
   const selectedNamespaces = useNamespaces();
-  const { items, errors } = resourceClass.useList({
+  const { items, errors } = useKubeList(resourceClass, {
     namespace: props.namespaces ?? selectedNamespaces,
   });
 

@@ -433,7 +433,12 @@ describe('runScript', () => {
 });
 
 describe('addRunCmdConsent', () => {
-  const AI_ASSISTANT_COMMANDS = ['gh auth', 'az account', 'az cognitiveservices'];
+  const AI_ASSISTANT_COMMANDS = [
+    JSON.stringify(['gh', 'auth']),
+    JSON.stringify(['gh', 'auth', 'token']),
+    JSON.stringify(['az', 'account']),
+    JSON.stringify(['az', 'cognitiveservices']),
+  ];
 
   it.each([
     ['headlamp_ai-assistant'],

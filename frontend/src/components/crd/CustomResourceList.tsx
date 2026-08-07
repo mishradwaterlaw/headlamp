@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useSelectedClusters } from '../../lib/k8s';
 import CRD, { KubeCRD } from '../../lib/k8s/crd';
+import { useKubeGet } from '../../lib/k8s/hooks';
 import { KubeObject } from '../../lib/k8s/KubeObject';
 import { localeDate } from '../../lib/util';
 import { EmptyContent as Empty, Link, Loader, ResourceListView } from '../common';
@@ -32,7 +33,7 @@ import {
 export default function CustomResourceList() {
   const { t } = useTranslation(['glossary', 'translation']);
   const { crd: crdName } = useParams<{ crd: string }>();
-  const [crd, error] = CRD.useGet(crdName);
+  const [crd, error] = useKubeGet(CRD, crdName);
 
   if (!crd && !error) {
     return <Loader title={t('translation|Loading custom resource definition')} />;

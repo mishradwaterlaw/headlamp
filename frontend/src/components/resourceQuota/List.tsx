@@ -20,6 +20,7 @@ import { styled } from '@mui/system';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
+import { useKubeList } from '../../lib/k8s/hooks';
 import ResourceQuota from '../../lib/k8s/resourceQuota';
 import { useNamespaces } from '../../redux/filterSlice';
 import { CreateResourceButton } from '../common/CreateResourceButton';
@@ -106,7 +107,9 @@ export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
 }
 
 export default function ResourceQuotaList() {
-  const { items: resourceQuotas, errors } = ResourceQuota.useList({ namespace: useNamespaces() });
+  const { items: resourceQuotas, errors } = useKubeList(ResourceQuota, {
+    namespace: useNamespaces(),
+  });
 
   return (
     <ResourceQuotaRenderer resourceQuotas={resourceQuotas} errors={errors} reflectTableInURL />

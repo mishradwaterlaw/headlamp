@@ -16,6 +16,7 @@
 
 import { useMemo } from 'react';
 import Event from '../../lib/k8s/event';
+import { useKubeList } from '../../lib/k8s/hooks';
 import type Node from '../../lib/k8s/node';
 
 /**
@@ -79,12 +80,12 @@ export function hasAKSManagedNodes(nodes: Node[]): boolean {
  * Shared by StatusCharts and UpgradeVisualizationPanel.
  */
 export function useIsUpgradeDetected(): boolean {
-  const { items: upgradeReasonEvents } = Event.useList({
+  const { items: upgradeReasonEvents } = useKubeList(Event, {
     limit: 500,
     fieldSelector: 'reason=Upgrade',
   });
 
-  const { items: surgeReasonEvents } = Event.useList({
+  const { items: surgeReasonEvents } = useKubeList(Event, {
     limit: 500,
     fieldSelector: 'reason=Surge',
   });

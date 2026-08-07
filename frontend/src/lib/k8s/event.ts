@@ -19,6 +19,7 @@ import { ResourceClasses } from '.';
 import { request } from './api/v1/clusterRequests';
 import type { QueryParameters } from './api/v1/queryParameters';
 import type { ApiError } from './api/v2/ApiError';
+import { useKubeList } from './hooks';
 import type { KubeMetadata } from './KubeMetadata';
 import type { KubeObjectClass } from './KubeObject';
 import { KubeObject } from './KubeObject';
@@ -212,7 +213,7 @@ export function useEventListForClusters(
   clusterNames: string[],
   options: { queryParams?: QueryParameters } = {}
 ) {
-  const queries = Event.useList({
+  const queries = useKubeList(Event, {
     clusters: clusterNames,
     ...options.queryParams,
   });

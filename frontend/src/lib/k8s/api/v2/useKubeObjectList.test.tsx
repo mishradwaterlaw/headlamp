@@ -211,7 +211,9 @@ describe('useWatchKubeObjectLists', () => {
 
   it('should not be enabled when no endpoint is provided', () => {
     const spy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     renderHook(() => useWatchKubeObjectLists({ kubeObjectClass: mockClass, lists: [] }), {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -222,7 +224,9 @@ describe('useWatchKubeObjectLists', () => {
 
   it('should call useWebSockets when endpoint and lists are provided', () => {
     const spy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
 
     renderHook(
       () =>
@@ -245,7 +249,9 @@ describe('useWatchKubeObjectLists', () => {
 
   it('should call useWebSockets when endpoint and 2 lists are provided', () => {
     const spy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
 
     renderHook(
       () =>
@@ -278,7 +284,9 @@ describe('useWatchKubeObjectLists', () => {
 
   it('should update query data on ADDED message', () => {
     const useWebSocketSpy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
 
     // Given
     const kubeObjectClass = mockClass;
@@ -355,7 +363,17 @@ describe('useWatchKubeObjectLists', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: {
+                  queries: { staleTime: Infinity, gcTime: Infinity, retry: false },
+                },
+              })
+            }
+          >
+            {children}
+          </QueryClientProvider>
         ),
       }
     );
@@ -414,7 +432,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should append the next page and start watching when all pages are loaded', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     mockClusterFetch
       .mockResolvedValueOnce({
         json: () =>
@@ -481,7 +501,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should refresh list resourceVersions when watching resumes after a query change', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     mockClusterFetch
       .mockResolvedValueOnce({
         json: () => Promise.resolve(makeListResponse({ resourceVersion: '1' })),
@@ -541,7 +563,11 @@ describe('useKubeObjectList', () => {
           queryParams: { limit: DEFAULT_LIST_LIMIT },
         }),
       {
-        wrapper: queryClientWrapper(new QueryClient()),
+        wrapper: queryClientWrapper(
+          new QueryClient({
+            defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+          })
+        ),
       }
     );
 
@@ -570,7 +596,11 @@ describe('useKubeObjectList', () => {
           queryParams: { limit: 2 },
         }),
       {
-        wrapper: queryClientWrapper(new QueryClient()),
+        wrapper: queryClientWrapper(
+          new QueryClient({
+            defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+          })
+        ),
       }
     );
 
@@ -601,7 +631,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should leave remainingItemCount unset when the server does not report it', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     mockClusterFetch.mockResolvedValueOnce({
       json: () =>
         Promise.resolve(
@@ -631,7 +663,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should expose loadMore errors through the list response', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     const loadMoreError = new ApiError('expired continue token', { status: 410 });
     mockClusterFetch
       .mockResolvedValueOnce({
@@ -688,7 +722,11 @@ describe('useKubeObjectList', () => {
           queryParams: { limit: 1 },
         }),
       {
-        wrapper: queryClientWrapper(new QueryClient()),
+        wrapper: queryClientWrapper(
+          new QueryClient({
+            defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+          })
+        ),
       }
     );
 
@@ -727,7 +765,11 @@ describe('useKubeObjectList', () => {
           queryParams: { limit: DEFAULT_LIST_LIMIT },
         }),
       {
-        wrapper: queryClientWrapper(new QueryClient()),
+        wrapper: queryClientWrapper(
+          new QueryClient({
+            defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+          })
+        ),
       }
     );
 
@@ -745,7 +787,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should clear loadMore errors when request inputs change', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     const loadMoreError = new ApiError('expired continue token', { status: 410 });
     mockClusterFetch
       .mockResolvedValueOnce({
@@ -800,7 +844,9 @@ describe('useKubeObjectList', () => {
   });
 
   it('should ignore duplicate loadMore calls while a page is already loading', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     const nextPage = deferred<Response>();
     mockClusterFetch
       .mockResolvedValueOnce({
@@ -854,7 +900,9 @@ describe('useKubeObjectList', () => {
 
   it('should call useKubeObjectList with 1 namespace after reducing amount of namespaces', async () => {
     const spy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
 
     queryClient.setQueryData(['kubeObject', 'list', 'v1', 'pods', 'default', 'a', {}], {
       list: { items: [], metadata: { resourceVersion: '0' } },
@@ -889,7 +937,9 @@ describe('useKubeObjectList', () => {
 
   it('should clean up cluster-scoped resources when cluster is removed', async () => {
     const spy = vi.spyOn(websocket, 'useWebSockets');
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
 
     queryClient.setQueryData(['kubeObject', 'list', 'v1', 'nodes', 'cluster-1', '', {}], {
       list: { items: [], metadata: { resourceVersion: '0' } },
@@ -943,7 +993,17 @@ describe('useWatchKubeObjectLists (Multiplexer)', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: {
+                  queries: { staleTime: Infinity, gcTime: Infinity, retry: false },
+                },
+              })
+            }
+          >
+            {children}
+          </QueryClientProvider>
         ),
       }
     );
@@ -972,7 +1032,17 @@ describe('useWatchKubeObjectLists (Multiplexer)', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: {
+                  queries: { staleTime: Infinity, gcTime: Infinity, retry: false },
+                },
+              })
+            }
+          >
+            {children}
+          </QueryClientProvider>
         ),
       }
     );
@@ -1008,7 +1078,17 @@ describe('useWatchKubeObjectLists (Multiplexer)', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: {
+                  queries: { staleTime: Infinity, gcTime: Infinity, retry: false },
+                },
+              })
+            }
+          >
+            {children}
+          </QueryClientProvider>
         ),
       }
     );
@@ -1034,7 +1114,17 @@ describe('useWatchKubeObjectLists (Multiplexer)', () => {
         }),
       {
         wrapper: ({ children }) => (
-          <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: {
+                  queries: { staleTime: Infinity, gcTime: Infinity, retry: false },
+                },
+              })
+            }
+          >
+            {children}
+          </QueryClientProvider>
         ),
       }
     );
@@ -1043,7 +1133,9 @@ describe('useWatchKubeObjectLists (Multiplexer)', () => {
   });
 
   it('should omit pagination query params after loading all pages', async () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity, retry: false } },
+    });
     mockClusterFetch
       .mockResolvedValueOnce({
         json: () =>

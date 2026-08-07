@@ -30,6 +30,7 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { apply } from '../../lib/k8s/api/v1/apply';
 import CronJob from '../../lib/k8s/cronJob';
+import { useKubeGet, useKubeList } from '../../lib/k8s/hooks';
 import Job from '../../lib/k8s/job';
 import { localeDate } from '../../lib/util';
 import { clusterAction } from '../../redux/clusterActionSlice';
@@ -146,8 +147,8 @@ export default function CronJobDetails(props: {
   const { t, i18n } = useTranslation('glossary');
   const dispatch: AppDispatch = useDispatch();
 
-  const [cronJob] = CronJob.useGet(name, namespace);
-  const { items: jobs, errors } = Job.useList({ namespace, cluster: cronJob?.cluster });
+  const [cronJob] = useKubeGet(CronJob, name, namespace);
+  const { items: jobs, errors } = useKubeList(Job, { namespace, cluster: cronJob?.cluster });
   const [isSpawnDialogOpen, setIsSpawnDialogOpen] = useState(false);
   const [isPendingSuspend, setIsPendingSuspend] = useState(false);
   const isCronSuspended = cronJob?.spec?.suspend ?? false;

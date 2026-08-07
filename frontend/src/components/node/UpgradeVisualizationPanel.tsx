@@ -29,6 +29,7 @@ import Typography from '@mui/material/Typography';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Event from '../../lib/k8s/event';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Node from '../../lib/k8s/node';
 import { hasAKSManagedNodes, useIsUpgradeDetected } from './upgradeDetection';
 import {
@@ -283,7 +284,7 @@ function NodeIdleRow({ state, node }: { state: NodeUpgradeState; node: Node | un
  * Gates on AKS-managed nodes so non-AKS clusters never pay the event-fetch cost.
  */
 export default function UpgradeVisualizationPanel() {
-  const { items: nodes } = Node.useList();
+  const { items: nodes } = useKubeList(Node);
 
   const isAKSCluster = useMemo(() => {
     if (!nodes) return false;
@@ -318,7 +319,7 @@ function UpgradeVisualizationPanelInner({ nodes }: { nodes: Node[] }) {
  */
 function UpgradeVisualizationPanelContent({ nodes }: { nodes: Node[] }) {
   // fetch for all Node events to buildNodeUpgradeStates
-  const { items: nodeEvents } = Event.useList({
+  const { items: nodeEvents } = useKubeList(Event, {
     limit: Event.maxLimit,
     fieldSelector: 'involvedObject.kind=Node',
   });

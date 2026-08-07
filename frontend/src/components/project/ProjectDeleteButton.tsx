@@ -16,6 +16,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Namespace from '../../lib/k8s/namespace';
 import { ProjectDefinition } from '../../redux/projectsSlice';
 import ActionButton, { ButtonStyle } from '../common/ActionButton';
@@ -30,7 +31,7 @@ interface ProjectDeleteButtonProps {
 export function ProjectDeleteButton({ project, buttonStyle }: ProjectDeleteButtonProps) {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
-  const [namespaces] = Namespace.useList({ clusters: project.clusters });
+  const [namespaces] = useKubeList(Namespace, { clusters: project.clusters });
 
   const projectNamespaces =
     namespaces?.filter(ns => project.namespaces.includes(ns.metadata.name)) ?? [];

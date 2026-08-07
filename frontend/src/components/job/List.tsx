@@ -19,6 +19,7 @@ import Box from '@mui/material/Box';
 import { useTranslation } from 'react-i18next';
 import { ApiError } from '../../lib/k8s/api/v2/ApiError';
 import { KubeContainer } from '../../lib/k8s/cluster';
+import { useKubeList } from '../../lib/k8s/hooks';
 import Job from '../../lib/k8s/job';
 import { formatDuration } from '../../lib/util';
 import { useNamespaces } from '../../redux/filterSlice';
@@ -93,7 +94,7 @@ export function makeJobStatusLabel(job: Job) {
 }
 
 export default function JobsList() {
-  const { items: jobs, errors } = Job.useList({ namespace: useNamespaces() });
+  const { items: jobs, errors } = useKubeList(Job, { namespace: useNamespaces() });
   return <JobsListRenderer jobs={jobs} errors={errors} reflectTableInURL />;
 }
 

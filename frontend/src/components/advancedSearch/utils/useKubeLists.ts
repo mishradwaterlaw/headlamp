@@ -19,6 +19,7 @@ import { ResourceClasses } from '../../../lib/k8s';
 import { ApiError } from '../../../lib/k8s/api/v2/ApiError';
 import { ApiResource } from '../../../lib/k8s/api/v2/ApiResource';
 import { KubeObject, KubeObjectClass } from '../../../lib/k8s/cluster';
+import { useKubeList } from '../../../lib/k8s/hooks';
 import { useNamespaces } from '../../../redux/filterSlice';
 
 /**
@@ -56,7 +57,7 @@ export const useKubeLists = (
   );
 
   const data = classes.map(it =>
-    it.useList({
+    useKubeList(it, {
       clusters,
       refetchInterval: refetchIntervalMs,
       namespace: namespaces ?? defaultNamespaces,
